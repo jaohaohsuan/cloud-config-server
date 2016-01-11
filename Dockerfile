@@ -14,5 +14,6 @@ EXPOSE 80
 ENTRYPOINT ["/usr/local/nginx/sbin/nginx"]
 CMD ["-c", "/usr/local/nginx/conf/container.conf"]
 
-ADD container.conf /usr/local/nginx/conf/
+ADD images /usr/local/nginx/images/
 ADD cloud-configs /usr/local/nginx/cloud-configs/
+ADD container.conf /usr/local/nginx/conf/
