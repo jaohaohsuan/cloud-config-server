@@ -8,12 +8,12 @@ RUN mkdir src && cd src && wget http://nginx.org/download/$NGINXVERSION.tar.gz &
 RUN cd src/$NGINXVERSION && ./configure --with-http_sub_module
 RUN cd src/$NGINXVERSION && make install
 
+VOLUME ["/usr/local/nginx/root","/usr/local/nginx/cloud-configs"]
+
 # This is the port nginx listens to by default
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/nginx/sbin/nginx"]
 CMD ["-c", "/usr/local/nginx/conf/container.conf"]
 
-ADD images /usr/local/nginx/images/
-ADD cloud-configs /usr/local/nginx/cloud-configs/
 ADD container.conf /usr/local/nginx/conf/
