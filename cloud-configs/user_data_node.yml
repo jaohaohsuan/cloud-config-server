@@ -185,6 +185,8 @@ coreos:
     initial-cluster: etcd0=http://${etcdip1}:2380,etcd1=http://${etcdip2}:2380,etcd2=http://${etcdip3}:2380
     proxy: on
   units:
+    - name: systemd-networkd.service
+      command: stop
     - name: "00-enp0s3.network"
       runtime: true
       content: |
@@ -195,6 +197,15 @@ coreos:
         DNS=${dns}
         Address=${myip}/24
         Gateway=${gateway}
+    - name: down-interfaces.service
+      command: start
+      content: |
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/ip link set enp0s3 down
+        ExecStart=/usr/bin/ip addr flush dev enp0s3
+    - name: systemd-networkd.service
+      command: restart
     - name: fleet.service
       command: start
     - name: flanneld.service
