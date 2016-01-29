@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #set variables
-myip=$2
+myip=192.168.31.$2
 num=$3
 dns="192.168.31.1"
 gateway="192.168.31.1"
