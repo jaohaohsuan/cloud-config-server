@@ -46,3 +46,5 @@ coreos:
         ExecStart=/usr/bin/ip addr flush dev enp0s3
     - name: systemd-networkd.service
       command: restart
+    - name: etcd2.service
+      command: start
