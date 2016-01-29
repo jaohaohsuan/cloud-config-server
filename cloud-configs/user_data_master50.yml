@@ -311,7 +311,7 @@ coreos:
     name: master50
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etc0=http://${etcdip1}:2380,etc1=http://${etcdip2}:2380,etc2=http://${etcdip3}:2380
+    initial-cluster: etcd0=http://${etcdip1}:2380,etcd1=http://${etcdip2}:2380,etcd2=http://${etcdip3}:2380
     proxy: on
   units:
     - name: systemd-networkd.service

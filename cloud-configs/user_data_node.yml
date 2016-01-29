@@ -1,0 +1,218 @@
+#cloud-config
+
+hostname: node${num}
+
+users:
+  - name: henry
+    passwd: $1$/Dz7RjiZ$bYW8jDXvtPfGeoG9Lv68J.
+    groups:
+      - sudo
+      - docker
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxX2im4hTlGi2+oUaqzmguRmXOoHqFofvSILYegBHu2cmu3cHMFyQX9mBa2qVJ/+d6F/lfJ1XX4OYxPwtEe4YHgzsUzvUgZod3x2hoim2uOGaf0BoRdTAnQxY6Tum9fylI+MzMmDLFR1d2G3AzGyDPc9baZJWVCElNLbeq47sXITiVl5j52u+WHPRnEy/PMIX5amLPWTBYPds7qF8zlUJaM6r9xedFyyv2t5J/6Zn755f0S9rEVw5ga8H71qj4d9MgaHF5DjLS46ml5lL7vmNpk2wdIL54ncZ5a/I4JcFsnhycrBIXVoaq+aubstyByG6S8qa4OqSPOIaHvfaIK9fNcffVoTzjGNyZo5yy2qEemSPQ0emSp0CiuGra7E4cPnbhFdfEJHXOz7+TJ5CwY0QvR6wEOr0t5PxzHZsI4aoKvrrEeoeua9guZmRU41SujCvi4sDSXRVfxyq6yLhk9kVS4/zbXIsANN9p9CkeXUsZiAqUv6d+rRXY2kuh0S5aM9a1GoRHbfYxeNIXeko3hkJnl9CFtd2qnio0L+vLF55wvuvYgoxmW/YtNfIsI8DO43+Ydez7SIGfauuErBqPhAUYL2U5S4i8p/Oqnzuxm755R5/yXO3Wxko27LC09YhnZGk8AswsIv3rdgYiNscDQMZorya5WH4lnJjkJnmmOh44mw== jaohaohsuan@gmail.com
+
+ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxX2im4hTlGi2+oUaqzmguRmXOoHqFofvSILYegBHu2cmu3cHMFyQX9mBa2qVJ/+d6F/lfJ1XX4OYxPwtEe4YHgzsUzvUgZod3x2hoim2uOGaf0BoRdTAnQxY6Tum9fylI+MzMmDLFR1d2G3AzGyDPc9baZJWVCElNLbeq47sXITiVl5j52u+WHPRnEy/PMIX5amLPWTBYPds7qF8zlUJaM6r9xedFyyv2t5J/6Zn755f0S9rEVw5ga8H71qj4d9MgaHF5DjLS46ml5lL7vmNpk2wdIL54ncZ5a/I4JcFsnhycrBIXVoaq+aubstyByG6S8qa4OqSPOIaHvfaIK9fNcffVoTzjGNyZo5yy2qEemSPQ0emSp0CiuGra7E4cPnbhFdfEJHXOz7+TJ5CwY0QvR6wEOr0t5PxzHZsI4aoKvrrEeoeua9guZmRU41SujCvi4sDSXRVfxyq6yLhk9kVS4/zbXIsANN9p9CkeXUsZiAqUv6d+rRXY2kuh0S5aM9a1GoRHbfYxeNIXeko3hkJnl9CFtd2qnio0L+vLF55wvuvYgoxmW/YtNfIsI8DO43+Ydez7SIGfauuErBqPhAUYL2U5S4i8p/Oqnzuxm755R5/yXO3Wxko27LC09YhnZGk8AswsIv3rdgYiNscDQMZorya5WH4lnJjkJnmmOh44mw== jaohaohsuan@gmail.com
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZICnJ0KH4TfX3Hj/u4+YeJYkwMyu9TgErr46Z8TICTvD11f7C6xiUJSl5UzwoenE9nr4I1Xrorca3Tnxb7bnWC2t4fjWZvMa7cc4YmbdjTU8hKsZb1ltGt7w7dXF6ZKD9x4G8lNKN3u5GeqDkn38ppr54YeEISdx0r0On3d/fPcC7g89UIRw1mMHY5kJc1ERLEWEfPGN5MGcdMUMiXFOQYLX5xHX7Jlxq99JyqaUm0MHPLyZXUDISg/+0FDM1esix3WNQhAFB9XsUduJp/6TAX6M1w+DVOPJ4z7tq/kD4Om7e2Py5pVJJfcp8DoxXHkY9wu0sNDL0ddCLq+zI1sSD henry@henrys-iMac.local
+
+write_files:
+  - path: "/etc/flannel/options.env"
+    permissions: 0664
+    owner: "root"
+    content: |
+      FLANNELD_IFACE=${myip}
+      FLANNELD_ETCD_ENDPOINTS=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
+  - path: /etc/systemd/system/kubelet.service
+    permissions: 0664
+    owner: "root"
+    content: |
+      [Service]
+      ExecStart=/usr/bin/kubelet \
+        --api-servers=https://${master} \
+        --register-node=true \
+        --allow-privileged=true \
+        --config=/etc/kubernetes/manifests \
+        --hostname-override=${myip} \
+        --cluster-dns=10.100.0.10 \
+        --cluster-domain=cluster.local \
+        --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+        --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+        --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
+      Restart=always
+      RestartSec=10
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/kubernetes/ssl/ca.pem
+    permissions: 0664
+    content: |
+      -----BEGIN CERTIFICATE-----
+      MIIDGjCCAgKgAwIBAgIJANgWyqepacYDMA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
+      BAMTB2t1YmUtY2EwHhcNMTYwMTI4MDMxMjExWhcNNDMwNjE1MDMxMjExWjASMRAw
+      DgYDVQQDEwdrdWJlLWNhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+      tN+L7z/AJNhKS6DLBhlqMZ/UEWE02UUoeL5ZELT1wO1Y/TkdevQXtf0ctY+6GPs0
+      KEnCp5el42LQJgQJveji+vYemXx3qAhwPf8ZYS7FmIxn8OkwdFrGIuAsWfA+8lQt
+      TTcOADQe3z/01fnzzx+Kvu6m3XlZQu5hzAusEZXrDl9ST0ylwtlyTP/MSKWRL2yq
+      O0TtQdh+99uM5FlW8Gxzd38MkME2jLZLH+rIxz3/rcHuLDm9UN5Jn30rEZK96XR3
+      rurSoXrEHQkFSU+o0q+bcZfeM+NqJZfOo3TfQEGI6TLAPcVAeX2ztdRsvleEEDQH
+      LucEWlliQkdxt1QExTRLVQIDAQABo3MwcTAdBgNVHQ4EFgQUe0r/LTSdPt/GlqSr
+      N9xW9wqCHukwQgYDVR0jBDswOYAUe0r/LTSdPt/GlqSrN9xW9wqCHumhFqQUMBIx
+      EDAOBgNVBAMTB2t1YmUtY2GCCQDYFsqnqWnGAzAMBgNVHRMEBTADAQH/MA0GCSqG
+      SIb3DQEBBQUAA4IBAQASFzTvIgsmHsB3dhZifPd5N6fzlhoLOll7oLfPZ29q8cXm
+      fn9pNB7ssQGjrtDRXsKQzdHJTsqiHLu9LOwK/GmiBim8Wb7P4A4/dqxY08r7lbyx
+      IgW4ome45XJJ6t705mbxb96J9Q2rIUQMU08aEAaxjGL+2VkdC2HJhcQ8uBPAlscA
+      d+g69ckn0w/5VeH86SAnqnNcmHDq366a1xkeGAUIHhRfrfKqPywZA7GKwd3WQl+K
+      vX2BPpmst8vd0GokVDQM5x0A6yNW0lSD+GNmzclRDASxplokH+cX/IjbqMHhTCZB
+      Co53ijQCum+esGdTToQAKGkbWxQfcmaRkh29CTbB
+      -----END CERTIFICATE-----
+  - path: /etc/kubernetes/ssl/worker.pem
+    permissions: 0664
+    content: |
+      -----BEGIN CERTIFICATE-----
+      MIIC0TCCAbmgAwIBAgIJAJsyL6xJJrXzMA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
+      BAMTB2t1YmUtY2EwHhcNMTYwMTI5MDQ1NDQ3WhcNMTcwMTI4MDQ1NDQ3WjARMQ8w
+      DQYDVQQDDAZub2RlOTAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCm
+      ylmPiMIQvHzLUlOTfIEHm90ZBostX3p7vZkjZkbXgIDywUcdAkqTvl/oJ60Ni8do
+      jnuUpeokdYOysmEPS6BC1PdHaOpv7TrB+ZNh9i69gRbODNTT3zGbib5RhzcG/Aiu
+      Jd9XGRt7hMuffNw3NKTmf+eccQ1BIpd2mEdJKEZwvSolrSXs56RJWJRQOhmdLE0Q
+      4T1C0LmadCeWz1G21r+qLtekCsGHMHTCYWtEZewEF2qZ6YGmS9E59awNYnOTRSrR
+      dlg+/nKrLmXm3eCiZ3V8NqU4BCKjuruOufTaIATlB2GgN2vCvh5d6WaLyhFnF0ed
+      vl5p18L8uW2yoewjFjqTAgMBAAGjKzApMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgXg
+      MA8GA1UdEQQIMAaHBMCoH1owDQYJKoZIhvcNAQEFBQADggEBADKXMlAiu2JVMU8i
+      q9Gm1YqKEBvDiSvOHGYaSs3w9mmXye8BioonfFzxmgki1ax9zr9FcY+Uhvj9cHcM
+      p9UF1R5TaMFcHGzUJBvTfBbZc4IlOL71KcgsarVLlf0kQ7a8EJ04uPNPIvqu3tay
+      8BIbBTUk4DjvAX2rUEtl6KULdCWfmdOZzxAJfQ/itjROLMMj6u6QCKf1BUecwVA3
+      G1rZSHA3CsWKIdlE7tyIET1cw7Syt+bVxQtja2M2leblemcMri+CsVsM+hJFN+YR
+      fpZRCYJk017Ewk/+W6ZjsiMtXQHnCAOtcNomuIf8KpvghLySbECK7P2p5/VvQSVC
+      YzO9jME=
+      -----END CERTIFICATE-----
+  - path: /etc/kubernetes/ssl/worker-key.pem
+    permissions: 0600
+    owner: "root:root"
+    content: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEApspZj4jCELx8y1JTk3yBB5vdGQaLLV96e72ZI2ZG14CA8sFH
+      HQJKk75f6CetDYvHaI57lKXqJHWDsrJhD0ugQtT3R2jqb+06wfmTYfYuvYEWzgzU
+      098xm4m+UYc3BvwIriXfVxkbe4TLn3zcNzSk5n/nnHENQSKXdphHSShGcL0qJa0l
+      7OekSViUUDoZnSxNEOE9QtC5mnQnls9Rtta/qi7XpArBhzB0wmFrRGXsBBdqmemB
+      pkvROfWsDWJzk0Uq0XZYPv5yqy5l5t3gomd1fDalOAQio7q7jrn02iAE5QdhoDdr
+      wr4eXelmi8oRZxdHnb5eadfC/LltsqHsIxY6kwIDAQABAoIBAQCitp9ezrz8VNWu
+      CRett3WtNZohsueOESpNk27VQQ71Z9DkgjfdDgIxVjT8J9DEeUvFLdNT9fSRMu+T
+      IkBcCpxC9r5yNOEY5ic/Wzo0BFYe29OimpP6SjB8G4nGwZGmR7Q0KJBUyRKtkqSP
+      Z+DyHnKMx9TtIsEafSOkN/S7YwYtLlocFsgrFNXtSGkH/WTeUu0BFj0dAgmZDX9d
+      Q9whkF/szJWQs6pSjK6kjJeZMZf+7vtzQMD4FX6Y2T9QgsRLI1q6JLw6H2inKgL8
+      5Iob5rtDHFdkOLwmytMpBuBQbTjT4pcIP4jDdHvYUEosQjvq20nkA2HaMpLEexmK
+      GvpPP/LpAoGBANrUTV7iqG6drveaphDbC1p49qiuknEbT3tRQBFC4oIneZygz2sJ
+      hF50NoK7/6yEF9Triz3DqfkX5OkgwqEE2SBsb9YBggeEwGwMTzQ4PsodSQsjNuvk
+      +/xOGIAymZft0/U54d39EF0qGneng2UiRV9HrWE0rmZFaVyELB2mruulAoGBAMMf
+      KNlDWVDuBUWgk0ILriNBOjFD5aed7Rc/0ynEqXlxWCFo03fgPosI887KoUFV86aq
+      WfCdBQfAhuu3/ZMRd/H61viSq4PpuKWwStMXmolSJAbzF0N4z2d4zr6LUoMMMUkc
+      0DG+JWYljqyIu8Rjkwlmi8dBKf+7wPlEtGeNcJfXAoGAGeQIi3NxzjSl4PHROClS
+      fI/XTznoZa1/h+2jEOfC+PdGsjtsjxN/L9W8JVes9nJih3Se8t3VnH0xPkv7+yUh
+      s25hBQcEpXMVeTMzo9ALzcoNPF4cP2jGT6HF0FUsSwd+joMcsDEi4IL8wq91ImAd
+      qRpH7zpWcA9CWgnhVljEVWkCgYA6VK5ZhRDGaOGalw5uyB8e2vkSkUGugj/Gm4X9
+      DpW7gG7gTf4p8BfCaMK6J0ldxtw4DuUkUUyXrK6o+TANL0O0S1DIrtAnd0+D+Nfl
+      k0DXnH64tSNXQF6AiFUGEZBxLMvvF3YF6No1VzT3z0iSxVHHlahjwM9VbEOcQTXN
+      XzMxsQKBgQCwlMvGW01Uj5f7uLkTywU6lLvOkuvpHZJNAmbZblxNlDip3iHTUD8q
+      gZM9F4EnFzoPkD6jru0PLSO+QQfudL7yDAT6OxkfvawCSuoxLSOKU4Xl6jR19bya
+      y4myREVE1olavCItS0o4oKZlwJa5Iz+LYjgIYRmoFGFAqCCq/3S2ig==
+      -----END RSA PRIVATE KEY-----
+  - path: /etc/kubernetes/manifests/kube-proxy.yaml
+    permissions: 0664
+    content: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-proxy
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: kube-proxy
+          image: gcr.io/google_containers/hyperkube:v1.1.2
+          command:
+          - /hyperkube
+          - proxy
+          - --master=https://${master}
+          - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
+          - --proxy-mode=iptables
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /etc/ssl/certs
+              name: "ssl-certs"
+            - mountPath: /etc/kubernetes/worker-kubeconfig.yaml
+              name: "kubeconfig"
+              readOnly: true
+            - mountPath: /etc/kubernetes/ssl
+              name: "etc-kube-ssl"
+              readOnly: true
+        volumes:
+          - name: "ssl-certs"
+            hostPath:
+              path: "/usr/share/ca-certificates"
+          - name: "kubeconfig"
+            hostPath:
+              path: "/etc/kubernetes/worker-kubeconfig.yaml"
+          - name: "etc-kube-ssl"
+            hostPath:
+              path: "/etc/kubernetes/ssl"
+  - path: /etc/kubernetes/worker-kubeconfig.yaml
+    permissions: 0664
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: local
+        cluster:
+          certificate-authority: /etc/kubernetes/ssl/ca.pem
+      users:
+      - name: kubelet
+        user:
+          client-certificate: /etc/kubernetes/ssl/worker.pem
+          client-key: /etc/kubernetes/ssl/worker-key.pem
+      contexts:
+      - context:
+          cluster: local
+          user: kubelet
+        name: kubelet-context
+      current-context: kubelet-context
+
+coreos:
+  etcd2:
+    name: node${num}
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-cluster: etcd0=http://${etcdip1}:2380,etcd1=http://${etcdip2}:2380,etcd2=http://${etcdip3}:2380
+    proxy: on
+  units:
+    - name: "00-enp0s3.network"
+      runtime: true
+      content: |
+        [Match]
+        Name=enp0s3
+
+        [Network]
+        DNS=${dns}
+        Address=${myip}/24
+        Gateway=${gateway}
+    - name: fleet.service
+      command: start
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 40-ExecStartPre-symlink.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
+    - name: docker.service
+      command: start
+      drop-ins:
+        - name: 40-flannel.conf
+          content: |
+            [Unit]
+            Requires=flanneld.service
+            After=flanneld.service
+            [Service]
+            Environment="DOCKER_OPTS=--registry-mirror=http://${master}:5000"
+    - name: kubelet.service
+      command: start
