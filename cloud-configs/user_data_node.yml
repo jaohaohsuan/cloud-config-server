@@ -22,26 +22,6 @@ write_files:
     content: |
       FLANNELD_IFACE=${myip}
       FLANNELD_ETCD_ENDPOINTS=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-  - path: /etc/systemd/system/kubelet.service
-    permissions: 0664
-    owner: "root"
-    content: |
-      [Service]
-      ExecStart=/usr/bin/kubelet \
-        --api-servers=https://${master} \
-        --register-node=true \
-        --allow-privileged=true \
-        --config=/etc/kubernetes/manifests \
-        --hostname-override=${myip} \
-        --cluster-dns=10.100.0.10 \
-        --cluster-domain=cluster.local \
-        --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
-        --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
-        --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
-      Restart=always
-      RestartSec=10
-      [Install]
-      WantedBy=multi-user.target
   - path: /etc/kubernetes/ssl/ca.pem
     permissions: 0664
     content: |
@@ -227,3 +207,23 @@ coreos:
             Environment="DOCKER_OPTS=--registry-mirror=http://${master}:5000"
     - name: kubelet.service
       command: start
+      content: |
+        [Unit]
+        Requires=network-online.target
+        After=network-online.target
+        [Service]
+        ExecStart=/usr/bin/kubelet \
+          --api-servers=https://${master} \
+          --register-node=true \
+          --allow-privileged=true \
+          --config=/etc/kubernetes/manifests \
+          --hostname-override=${myip} \
+          --cluster-dns=10.100.0.10 \
+          --cluster-domain=cluster.local \
+          --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+          --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
+        Restart=always
+        RestartSec=10
+        [Install]
+        WantedBy=multi-user.target
