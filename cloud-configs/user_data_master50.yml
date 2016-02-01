@@ -22,23 +22,6 @@ write_files:
     content: |
       FLANNELD_IFACE=${myip}
       FLANNELD_ETCD_ENDPOINTS=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-  - path: /etc/systemd/system/kubelet.service
-    permissions: 0664
-    owner: "root"
-    content: |
-      [Service]
-      ExecStart=/usr/bin/kubelet \
-        --api-servers=http://127.0.0.1:8080 \
-        --register-node=false \
-        --allow-privileged=true \
-        --config=/etc/kubernetes/manifests \
-        --hostname-override=${myip} \
-        --cluster-dns=10.100.0.10 \
-        --cluster-domain=cluster.local
-      Restart=always
-      RestartSec=10
-      [Install]
-      WantedBy=multi-user.target
   - path: /etc/kubernetes/ssl/ca.pem
     permissions: 0664
     content: |
@@ -115,196 +98,6 @@ write_files:
       tFzuHKIPGIPr+pK9MTjMWNS3moxP2cxO5WTHrN9sL9IhXmuwa6e8HNRCWBYntUzQ
       CpGznCfq2z3WmYHeYs5DJjqSdTpke6vWZ7aJDTN7Ad/uG8OLJoFVTw==
       -----END RSA PRIVATE KEY-----
-  - path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-apiserver
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: kube-apiserver
-          image: gcr.io/google_containers/hyperkube:v1.1.4
-          command:
-          - /hyperkube
-          - apiserver
-          - --bind-address=0.0.0.0
-          - --insecure-bind-address=0.0.0.0
-          - --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-          - --allow-privileged=true
-          - --service-cluster-ip-range=10.100.0.0/16
-          - --secure-port=443
-          - --advertise-address=${myip}
-          - --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
-          - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
-          - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-          - --client-ca-file=/etc/kubernetes/ssl/ca.pem
-          - --service-account-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-          ports:
-          - containerPort: 443
-            hostPort: 443
-            name: https
-          - containerPort: 8080
-            hostPort: 8080
-            name: local
-          volumeMounts:
-          - mountPath: /etc/kubernetes/ssl
-            name: ssl-certs-kubernetes
-            readOnly: true
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
-        volumes:
-        - hostPath:
-            path: /etc/kubernetes/ssl
-          name: ssl-certs-kubernetes
-        - hostPath:
-            path: /usr/share/ca-certificates
-          name: ssl-certs-host
-  - path: /etc/kubernetes/manifests/kube-proxy.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-proxy
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: kube-proxy
-          image: gcr.io/google_containers/hyperkube:v1.1.4
-          command:
-          - /hyperkube
-          - proxy
-          - --master=http://127.0.0.1:8080
-          - --proxy-mode=iptables
-          securityContext:
-            privileged: true
-          volumeMounts:
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
-        volumes:
-        - hostPath:
-            path: /usr/share/ca-certificates
-          name: ssl-certs-host
-  - path: /etc/kubernetes/manifests/kube-podmaster.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-podmaster
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: scheduler-elector
-          image: gcr.io/google_containers/podmaster:1.1
-          command:
-          - /podmaster
-          - --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-          - --key=scheduler
-          - --whoami=${myip}
-          - --source-file=/src/manifests/kube-scheduler.yaml
-          - --dest-file=/dst/manifests/kube-scheduler.yaml
-          volumeMounts:
-          - mountPath: /src/manifests
-            name: manifest-src
-            readOnly: true
-          - mountPath: /dst/manifests
-            name: manifest-dst
-        - name: controller-manager-elector
-          image: gcr.io/google_containers/podmaster:1.1
-          command:
-          - /podmaster
-          - --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-          - --key=controller
-          - --whoami=${myip}
-          - --source-file=/src/manifests/kube-controller-manager.yaml
-          - --dest-file=/dst/manifests/kube-controller-manager.yaml
-          terminationMessagePath: /dev/termination-log
-          volumeMounts:
-          - mountPath: /src/manifests
-            name: manifest-src
-            readOnly: true
-          - mountPath: /dst/manifests
-            name: manifest-dst
-        volumes:
-        - hostPath:
-            path: /srv/kubernetes/manifests
-          name: manifest-src
-        - hostPath:
-            path: /etc/kubernetes/manifests
-          name: manifest-dst
-  - path: /srv/kubernetes/manifests/kube-controller-manager.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-controller-manager
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: kube-controller-manager
-          image: gcr.io/google_containers/hyperkube:v1.1.4
-          command:
-          - /hyperkube
-          - controller-manager
-          - --master=http://127.0.0.1:8080
-          - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-          - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-          livenessProbe:
-            httpGet:
-              host: 127.0.0.1
-              path: /healthz
-              port: 10252
-            initialDelaySeconds: 15
-            timeoutSeconds: 1
-          volumeMounts:
-          - mountPath: /etc/kubernetes/ssl
-            name: ssl-certs-kubernetes
-            readOnly: true
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
-        volumes:
-        - hostPath:
-            path: /etc/kubernetes/ssl
-          name: ssl-certs-kubernetes
-        - hostPath:
-            path: /usr/share/ca-certificates
-          name: ssl-certs-host
-  - path: /srv/kubernetes/manifests/kube-scheduler.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-scheduler
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: kube-scheduler
-          image: gcr.io/google_containers/hyperkube:v1.1.4
-          command:
-          - /hyperkube
-          - scheduler
-          - --master=http://127.0.0.1:8080
-          livenessProbe:
-            httpGet:
-              host: 127.0.0.1
-              path: /healthz
-              port: 10251
-            initialDelaySeconds: 15
-            timeoutSeconds: 1
 
 coreos:
   etcd2:
@@ -401,3 +194,49 @@ coreos:
         ExecStart=-/usr/bin/mkdir -p /opt/bin
         ExecStart=/usr/bin/wget -c -nc -P /opt/bin https://192.168.31.70/v1.1.7/hyperkube
         ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
+    - name: kube-apiserver.service
+      command: start
+      content: |
+        [Unit]
+        Requires=etcd2.service docker-cache.service fleet.service docker.service flanneld.service kube-install.service
+        After=etcd2.service docker-cache.service fleet.service docker.service flanneld.service kube-install.service
+        [Service]
+        ExecStart=/opt/bin/hyperkube apiserver \
+          --bind-address=0.0.0.0
+          --insecure-bind-address=0.0.0.0
+          --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
+          --allow-privileged=true
+          --service-cluster-ip-range=10.100.0.0/16
+          --secure-port=443
+          --advertise-address=${myip}
+          --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
+          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+          --client-ca-file=/etc/kubernetes/ssl/ca.pem
+          --service-account-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+        Restart=always
+        RestartSec=10
+    - name: kube-controller-manager.service
+      command: start
+      content: |
+        [Unit]
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+        [Service]
+        ExecStart=/opt/bin/hyperkube controller-manager \
+          --master=http://127.0.0.1:8080 \
+          --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+          --root-ca-file=/etc/kubernetes/ssl/ca.pem
+        Restart=always
+        RestartSec=10
+    - name: kube-scheduler.service
+      command: start
+      content: |
+        [Unit]
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+        [Service]
+        ExecStart=/opt/bin/hyperkube scheduler \
+          --master=http://127.0.0.1:8080
+        Restart=always
+        RestartSec=10
