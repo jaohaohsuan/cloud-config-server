@@ -145,15 +145,12 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill v2-mirror
         ExecStartPre=-/usr/bin/docker rm v2-mirror
         ExecStartPre=/usr/bin/docker pull registry:2
-        ExecStartPre=/usr/bin/mkdir -p /var/lib/registry/{data,auth,certs}
-        ExecStartPre=/usr/bin/ln -sf /etc/kubernetes/ssl/apiserver.pem /var/lib/registry/certs/domain.crt
-        ExecStartPre=/usr/bin/ln -sf /etc/kubernetes/ssl/apiserver-key.pem /var/lib/registry/certs/domain.key
+        ExecStartPre=/usr/bin/mkdir -p /var/lib/registry
         ExecStart=/usr/bin/docker run --rm --net host --name v2-mirror \
-          -v /var/lib/registry/data:/var/lib/registry \
-          -v /var/lib/registry/certs:/certs \
-          -v /var/lib/registry/auth:/auth \
-          -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
-          -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
+          -v /var/lib/registry:/var/lib/registry \
+          -v /etc/kubernetes/ssl:/certs \
+          -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/apiserver.pem \
+          -e REGISTRY_HTTP_TLS_KEY=/certs/apiserver-key.pem \
           -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \
           registry:2
     - name: fleet.service
@@ -192,7 +189,7 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=-/usr/bin/mkdir -p /opt/bin
-        ExecStart=/usr/bin/wget -c -nc -P /opt/bin https://192.168.31.70/v1.1.7/hyperkube
+        ExecStart=/usr/bin/wget -c -nc -P /opt/bin http://192.168.31.70/v1.1.7/hyperkube
         ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
     - name: kube-apiserver.service
       command: start
@@ -202,17 +199,17 @@ coreos:
         After=etcd2.service docker-cache.service fleet.service docker.service flanneld.service kube-install.service
         [Service]
         ExecStart=/opt/bin/hyperkube apiserver \
-          --bind-address=0.0.0.0
-          --insecure-bind-address=0.0.0.0
-          --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379
-          --allow-privileged=true
-          --service-cluster-ip-range=10.100.0.0/16
-          --secure-port=443
-          --advertise-address=${myip}
-          --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
-          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
-          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-          --client-ca-file=/etc/kubernetes/ssl/ca.pem
+          --bind-address=0.0.0.0 \
+          --insecure-bind-address=0.0.0.0 \
+          --etcd-servers=http://${etcdip1}:2379,http://${etcdip2}:2379,http://${etcdip3}:2379 \
+          --allow-privileged=true \
+          --service-cluster-ip-range=10.100.0.0/16 \
+          --secure-port=443 \
+          --advertise-address=${myip} \
+          --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
+          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+          --client-ca-file=/etc/kubernetes/ssl/ca.pem \
           --service-account-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         Restart=always
         RestartSec=10
@@ -225,7 +222,7 @@ coreos:
         [Service]
         ExecStart=/opt/bin/hyperkube controller-manager \
           --master=http://127.0.0.1:8080 \
-          --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+          --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
           --root-ca-file=/etc/kubernetes/ssl/ca.pem
         Restart=always
         RestartSec=10
