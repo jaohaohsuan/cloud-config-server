@@ -352,8 +352,15 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill v2-mirror
         ExecStartPre=-/usr/bin/docker rm v2-mirror
         ExecStartPre=/usr/bin/docker pull registry:2
+        ExecStartPre=/usr/bin/mkdir -p /var/lib/registry/{data,auth,certs}
+        ExecStartPre=/usr/bin/ln -sf /etc/kubernetes/ssl/apiserver.pem /var/lib/registry/certs/domain.crt
+        ExecStartPre=/usr/bin/ln -sf /etc/kubernetes/ssl/apiserver-key.pem /var/lib/registry/certs/domain.key
         ExecStart=/usr/bin/docker run --rm --net host --name v2-mirror \
-          -v /data:/var/lib/registry \
+          -v /var/lib/registry/data:/var/lib/registry \
+          -v /var/lib/registry/certs:/certs \
+          -v /var/lib/registry/auth:/auth \
+          -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
+          -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \
           -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \
           registry:2
     - name: fleet.service
@@ -381,3 +388,16 @@ coreos:
             After=flanneld.service
             [Service]
             Environment="DOCKER_OPTS=--registry-mirror=http://127.0.0.1:5000"
+    - name: kube-install.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download/Install Kubernetes
+        Requires=network-online.target
+        After=network-online.target
+        ConditionPathExists=/etc/kubernetes/ssl
+        [Service]
+        Type=oneshot
+        ExecStart=-/usr/bin/mkdir -p /opt/bin
+        ExecStart=/usr/bin/wget -c -nc -P /opt/bin https://192.168.31.70/v1.1.7/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
