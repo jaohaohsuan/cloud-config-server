@@ -96,46 +96,6 @@ write_files:
       gZM9F4EnFzoPkD6jru0PLSO+QQfudL7yDAT6OxkfvawCSuoxLSOKU4Xl6jR19bya
       y4myREVE1olavCItS0o4oKZlwJa5Iz+LYjgIYRmoFGFAqCCq/3S2ig==
       -----END RSA PRIVATE KEY-----
-  - path: /etc/kubernetes/manifests/kube-proxy.yaml
-    permissions: 0664
-    content: |
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: kube-proxy
-        namespace: kube-system
-      spec:
-        hostNetwork: true
-        containers:
-        - name: kube-proxy
-          image: gcr.io/google_containers/hyperkube:v1.1.4
-          command:
-          - /hyperkube
-          - proxy
-          - --master=https://${master}
-          - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
-          - --proxy-mode=iptables
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - mountPath: /etc/ssl/certs
-              name: "ssl-certs"
-            - mountPath: /etc/kubernetes/worker-kubeconfig.yaml
-              name: "kubeconfig"
-              readOnly: true
-            - mountPath: /etc/kubernetes/ssl
-              name: "etc-kube-ssl"
-              readOnly: true
-        volumes:
-          - name: "ssl-certs"
-            hostPath:
-              path: "/usr/share/ca-certificates"
-          - name: "kubeconfig"
-            hostPath:
-              path: "/etc/kubernetes/worker-kubeconfig.yaml"
-          - name: "etc-kube-ssl"
-            hostPath:
-              path: "/etc/kubernetes/ssl"
   - path: /etc/kubernetes/worker-kubeconfig.yaml
     permissions: 0664
     content: |
@@ -162,7 +122,7 @@ coreos:
     name: node${num}
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd0=http://${etcdip1}:2380,etcd1=http://${etcdip2}:2380,etcd2=http://${etcdip3}:2380
+    initial-cluster: etcd1=http://${etcdip1}:2380,etcd2=http://${etcdip2}:2380,etcd3=http://${etcdip3}:2380
     proxy: on
   units:
     - name: systemd-networkd.service
@@ -204,7 +164,20 @@ coreos:
             Requires=flanneld.service
             After=flanneld.service
             [Service]
-            Environment="DOCKER_OPTS=--registry-mirror=http://${master}:5000"
+            Environment="DOCKER_OPTS=--registry-mirror=https://${master}:5000 --insecure-registry={master}:5000"
+    - name: kube-install.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download/Install Kubernetes
+        Requires=network-online.target
+        After=network-online.target
+        ConditionPathExists=/etc/kubernetes/ssl
+        [Service]
+        Type=oneshot
+        ExecStart=-/usr/bin/mkdir -p /opt/bin
+        ExecStart=/usr/bin/wget -c -nc -P /opt/bin http://192.168.31.70/v1.1.7/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
     - name: kubelet.service
       command: start
       content: |
@@ -212,11 +185,10 @@ coreos:
         Requires=network-online.target
         After=network-online.target
         [Service]
-        ExecStart=/usr/bin/kubelet \
+        ExecStart=/opt/bin/hyperkube kubelet \
           --api-servers=https://${master} \
           --register-node=true \
           --allow-privileged=true \
-          --config=/etc/kubernetes/manifests \
           --hostname-override=${myip} \
           --cluster-dns=10.100.0.10 \
           --cluster-domain=cluster.local \
@@ -227,3 +199,16 @@ coreos:
         RestartSec=10
         [Install]
         WantedBy=multi-user.target
+    - name: kube-proxy.service 
+      command: start
+      content: |
+      [Unit] 
+      Requires=kube-install.service
+      After=kube-install.service
+      [Service]
+      ExecStart=/opt/bin/hyperkube proxy \
+        --master=https://{master} \
+        --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+        --proxy-mode=iptables
+      Restart=always
+      RestartSec=10
