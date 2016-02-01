@@ -10,12 +10,12 @@ etcdip2=192.168.31.31
 etcdip3=192.168.31.32
 master=192.168.31.50
 
-sed -e "s/\${myip}/$myip/" \
-    -e "s/\${dns}/$dns/" \
-    -e "s/\${num}/$num/" \
-    -e "s/\${master}/$master/" \
-    -e "s/\${etcdip1}/$etcdip1/" \
-    -e "s/\${etcdip2}/$etcdip2/" \
-    -e "s/\${etcdip3}/$etcdip3/" \
-    -e "s/\${gateway}/$gateway/" \
+sed -e "s/\${myip}/$myip/g" \
+    -e "s/\${dns}/$dns/g" \
+    -e "s/\${num}/$num/g" \
+    -e "s/\${master}/$master/g" \
+    -e "s/\${etcdip1}/$etcdip1/g" \
+    -e "s/\${etcdip2}/$etcdip2/g" \
+    -e "s/\${etcdip3}/$etcdip3/g" \
+    -e "s/\${gateway}/$gateway/g" \
     $1
