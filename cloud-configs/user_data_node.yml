@@ -202,13 +202,13 @@ coreos:
     - name: kube-proxy.service 
       command: start
       content: |
-      [Unit] 
-      Requires=kube-install.service
-      After=kube-install.service
-      [Service]
-      ExecStart=/opt/bin/hyperkube proxy \
-        --master=https://{master} \
-        --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
-        --proxy-mode=iptables
-      Restart=always
-      RestartSec=10
+        [Unit]
+        Requires=kube-install.service
+        After=kube-install.service
+        [Service]
+        ExecStart=/opt/bin/hyperkube proxy \
+          --master=https://${master} \
+          --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+          --proxy-mode=iptables
+        Restart=always
+        RestartSec=10
