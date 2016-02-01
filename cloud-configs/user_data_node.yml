@@ -164,7 +164,7 @@ coreos:
             Requires=flanneld.service
             After=flanneld.service
             [Service]
-            Environment="DOCKER_OPTS=--registry-mirror=https://${master}:5000 --insecure-registry={master}:5000"
+            Environment="DOCKER_OPTS=--registry-mirror=https://${master}:5000 --insecure-registry=${master}:5000"
     - name: kube-install.service
       command: start
       content: |
@@ -182,8 +182,8 @@ coreos:
       command: start
       content: |
         [Unit]
-        Requires=network-online.target
-        After=network-online.target
+        Requires=kube-install.service
+        After=kube-install.service
         [Service]
         ExecStart=/opt/bin/hyperkube kubelet \
           --api-servers=https://${master} \
