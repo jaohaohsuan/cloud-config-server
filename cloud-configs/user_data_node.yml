@@ -208,7 +208,7 @@ coreos:
         [Service]
         ExecStart=/opt/bin/hyperkube proxy \
           --master=https://${master} \
-	  --hostname-override=${myid} \
+          --hostname-override=${myid} \
           --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
           --proxy-mode=iptables
         Restart=always
