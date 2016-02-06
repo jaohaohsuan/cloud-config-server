@@ -2,13 +2,13 @@
 
 #set variables
 num=$2
-myip=192.168.31.$2
-dns=192.168.31.1
-gateway=192.168.31.1
-etcdip1=192.168.31.20
-etcdip2=192.168.31.21
-etcdip3=192.168.31.22
-master=192.168.31.50
+myip=10.0.2.$2
+dns=10.0.2.1
+gateway=10.0.2.1
+etcdip1=10.0.2.6
+etcdip2=10.0.2.7
+etcdip3=10.0.2.8
+master=10.0.2.10
 
 sed -e "s/\${myip}/$myip/g" \
     -e "s/\${dns}/$dns/g" \

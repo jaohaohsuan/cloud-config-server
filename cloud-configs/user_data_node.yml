@@ -48,53 +48,53 @@ write_files:
     permissions: 0664
     content: |
       -----BEGIN CERTIFICATE-----
-      MIIC0TCCAbmgAwIBAgIJAJsyL6xJJrXzMA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
-      BAMTB2t1YmUtY2EwHhcNMTYwMTI5MDQ1NDQ3WhcNMTcwMTI4MDQ1NDQ3WjARMQ8w
-      DQYDVQQDDAZub2RlOTAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCm
-      ylmPiMIQvHzLUlOTfIEHm90ZBostX3p7vZkjZkbXgIDywUcdAkqTvl/oJ60Ni8do
-      jnuUpeokdYOysmEPS6BC1PdHaOpv7TrB+ZNh9i69gRbODNTT3zGbib5RhzcG/Aiu
-      Jd9XGRt7hMuffNw3NKTmf+eccQ1BIpd2mEdJKEZwvSolrSXs56RJWJRQOhmdLE0Q
-      4T1C0LmadCeWz1G21r+qLtekCsGHMHTCYWtEZewEF2qZ6YGmS9E59awNYnOTRSrR
-      dlg+/nKrLmXm3eCiZ3V8NqU4BCKjuruOufTaIATlB2GgN2vCvh5d6WaLyhFnF0ed
-      vl5p18L8uW2yoewjFjqTAgMBAAGjKzApMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgXg
-      MA8GA1UdEQQIMAaHBMCoH1owDQYJKoZIhvcNAQEFBQADggEBADKXMlAiu2JVMU8i
-      q9Gm1YqKEBvDiSvOHGYaSs3w9mmXye8BioonfFzxmgki1ax9zr9FcY+Uhvj9cHcM
-      p9UF1R5TaMFcHGzUJBvTfBbZc4IlOL71KcgsarVLlf0kQ7a8EJ04uPNPIvqu3tay
-      8BIbBTUk4DjvAX2rUEtl6KULdCWfmdOZzxAJfQ/itjROLMMj6u6QCKf1BUecwVA3
-      G1rZSHA3CsWKIdlE7tyIET1cw7Syt+bVxQtja2M2leblemcMri+CsVsM+hJFN+YR
-      fpZRCYJk017Ewk/+W6ZjsiMtXQHnCAOtcNomuIf8KpvghLySbECK7P2p5/VvQSVC
-      YzO9jME=
+      MIIC0DCCAbigAwIBAgIJAJsyL6xJJrX3MA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
+      BAMTB2t1YmUtY2EwHhcNMTYwMjA2MTcwMDUwWhcNMTcwMjA1MTcwMDUwWjAQMQ4w
+      DAYDVQQDDAVub2RlNTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOM8
+      sDa6sqaxpgo+zmnwFsAPPQCOiJ5o+QHahdt93QRBtjs5pR2J8HpePoJc5OFuJuRZ
+      5r277c/7eoJlcbIP918crpdgSRBLf+DzfTnUGK50mL4Izc+s40CY4a6fopUitD4J
+      Q8iPbEbOli6aLQNFP0HKL8BzsT+4fuNIgTSDs6OP7OoFwwBEPpvTxK361SVo49mE
+      xzIa8zUrADdYVb8TYYhremGU6yr8ArBltKblFilVOTDuSTxlpqzw2JOben1+ml1p
+      hJKWMS06B68AWBRnIesscFs+egk4byz1s2xbV8pm4kNYFkcE/wkt3kiHh50x1V5O
+      L/UWNgtMS1WmRmJomkUCAwEAAaMrMCkwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAw
+      DwYDVR0RBAgwBocECgACBTANBgkqhkiG9w0BAQUFAAOCAQEAFBDSQwF+BP7lrMvN
+      wrv8AozWvjYyFh1JiDubsg467Q91xrBh+5xZy6CvfE7RBVChE9VdtGIODPxlwsqT
+      g2Lj+g5gF7Fan9V3spamuJpG1VoupHUxwSNSN2/kCtMAbI7McBH8bbwEgPapDa3t
+      CfM83cnae+4wLrvx5i68/rG6Zcxy89Wbnp7yOmgfhYRkPBHv6qXtb9Il5+HFFgrk
+      7B/ujj+pY7dePktRly713Bm38qinqD/JOo6Paeu3RaQfNJB9eBOjyoBgJft9DinD
+      2BUPlKyBIiVwZQ1g1xJsNNvKuMdejPhkNKlI45fIdkPz2mDwlFuqgJccQKNvmxUf
+      jDR/EQ==
       -----END CERTIFICATE-----
   - path: /etc/kubernetes/ssl/worker-key.pem
     permissions: 0600
     owner: "root:root"
     content: |
       -----BEGIN RSA PRIVATE KEY-----
-      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
+      MIIEowIBAAKCAQEA4zywNrqyprGmCj7OafAWwA89AI6Inmj5AdqF233dBEG2Ozml
+      HYnwel4+glzk4W4m5Fnmvbvtz/t6gmVxsg/3Xxyul2BJEEt/4PN9OdQYrnSYvgjN
+      z6zjQJjhrp+ilSK0PglDyI9sRs6WLpotA0U/QcovwHOxP7h+40iBNIOzo4/s6gXD
+      AEQ+m9PErfrVJWjj2YTHMhrzNSsAN1hVvxNhiGt6YZTrKvwCsGW0puUWKVU5MO5J
+      PGWmrPDYk5t6fX6aXWmEkpYxLToHrwBYFGch6yxwWz56CThvLPWzbFtXymbiQ1gW
+      RwT/CS3eSIeHnTHVXk4v9RY2C0xLVaZGYmiaRQIDAQABAoIBAEiUyOAiUA/obFWX
+      bAzwcAPWmjCEVmTquKZ76weJsz+50YAnUHMX7STY13SCQWUz7t4/TPFLhpFJDP97
+      cY5jhSrvGWEmkw/OXcE3ZMdE1MFcYrFIVJzB5zBp5KQHP0INfK7X/Luh+/6928B0
+      5G3H/4V/FDOPgI0O3BCyxvpEGuvh4b+33ghMA6KZrWnr2M1ri/Brnh2u+atqcY3U
+      oCll/cw+DTqSA+RqbdZImIYhxjaRCHKSfQMG708buWcO37aq3yEODKIGKfV4Nfyp
+      OsedDwtAmEeOKqrLOEjWIhMkvcEIgppd19HuPzk/CnmY46UvZ1LxvE71Xm3J34Kc
+      lKKQvSECgYEA83i2L7RskpQpSzPMHOW9frgxkF4h3/xC1fmAg8Yoqhf7mkRvz5jX
+      ys1MdtmpOMdKyGeINHW9/keUJ9coBOtYplSOsZeR4KX40OqZODu0yyIwtmg9PcTA
+      o6Y1VJAltt4y/HnV4Ih2TXEfSzpiOyUr5IuZPF4hkyETzSeyq455RfkCgYEA7u4e
+      Fe4BRw5EGevBLvtKRrdAeNbSQR1jn0Mi32mJUYcpR/JmXvAYxLaXFdOptLQZAXdp
+      uwq5lQYeTS2xV+IfOsI3DPKLVzKpSAZK7hYp/x7KM+Ad9bQpSv5jMfM6Ru23SJQY
+      03uvik6KzhdpRGvBpR5FrBmLzOi5mJO5bRNXGa0CgYEAsrf6LBxp0lL12OEFxHST
+      2/ADWfDvNsaqnP0P7CrKcMk4BG6WELImPRTkOx3dTPNlnqP45GFFfOE4DOKv2qST
+      J01MjWowR9ItSdXbcN7LAI1xaoQr6CqEKdx4q0FAnfKPRKt+Ztpk1MXj7cnGj5ni
+      lVovupNyW9jc+yxXx/zGYqkCgYAuoA8E7oYXTKRjfosbVPRgqmANdLZg+JA5Qwuq
+      F1kxrLOUk6wAeNAMiykenEhwt/htPdVHJ8ehWilNnE4QPVMkz0OY5jfk00EPihLT
+      NUYKwAJrbx/Jk9e/B7dpxvInZzouEqBpnKhb0AnsP8tOC80lIKwt8mpCmWOmb6Vu
+      sKh9nQKBgDjWR+/LSdn5STm6NJiBCVGwbIAJBJ5J43ggPoiYSKjDnRiQjuQQ5TkS
+      SdEG5DZ3U50YkozPORqZQnqluipk7qeGwSsG7PtzEqOM7L79YFp5GSH0twZ40r84
+      /+Oj89ssiatw8evjJ90YANty6CgRpiRL62SaLXdmmc75LKRCFkws
       -----END RSA PRIVATE KEY-----
   - path: /etc/kubernetes/worker-kubeconfig.yaml
     permissions: 0664
@@ -176,7 +176,7 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=-/usr/bin/mkdir -p /opt/bin
-        ExecStart=/usr/bin/wget -c -nc -P /opt/bin http://192.168.31.70/v1.1.7/hyperkube
+        ExecStart=/usr/bin/wget -c -nv -nc -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.1.7/bin/linux/amd64/hyperkube
         ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
     - name: kubelet.service
       command: start
