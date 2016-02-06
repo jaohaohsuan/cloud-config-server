@@ -1,11 +1,19 @@
 #!/bin/sh
 
 #set variables
-myip="192.168.31.50"
-dns="192.168.31.1"
-gateway="192.168.31.1"
-etcdip1="192.168.31.30"
-etcdip2="192.168.31.31"
-etcdip3="192.168.31.32"
+myip="10.0.2.$2"
+num=$2
+dns="10.0.2.1"
+gateway="10.0.2.1"
+etcdip1="10.0.2.6"
+etcdip2="10.0.2.7"
+etcdip3="10.0.2.8"
 
-sed -e "s/\${myip}/$myip/" -e "s/\${dns}/$dns/" -e "s/\${etcdip1}/$etcdip1/" -e "s/\${etcdip2}/$etcdip2/" -e "s/\${etcdip3}/$etcdip3/" -e "s/\${gateway}/$gateway/" $1
+sed -e "s/\${myip}/$myip/g" \
+	  -e "s/\${dns}/$dns/g" \
+	  -e "s/\${num}/$num/g" \
+		-e "s/\${etcdip1}/$etcdip1/g" \
+		-e "s/\${etcdip2}/$etcdip2/g" \
+		-e "s/\${etcdip3}/$etcdip3/g" \
+		-e "s/\${gateway}/$gateway/g" \
+		$1

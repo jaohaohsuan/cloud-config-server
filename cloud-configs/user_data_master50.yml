@@ -1,6 +1,6 @@
 #cloud-config
 
-hostname: master50
+hostname: master${num}
 
 users:
   - name: henry
@@ -48,8 +48,8 @@ write_files:
     permissions: 0664
     content: |
       -----BEGIN CERTIFICATE-----
-      MIIDRTCCAi2gAwIBAgIJAJsyL6xJJrXxMA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
-      BAMTB2t1YmUtY2EwHhcNMTYwMTI5MDE0ODUyWhcNMTcwMTI4MDE0ODUyWjAZMRcw
+      MIIDRTCCAi2gAwIBAgIJAJsyL6xJJrX2MA0GCSqGSIb3DQEBBQUAMBIxEDAOBgNV
+      BAMTB2t1YmUtY2EwHhcNMTYwMjA2MTYzNTEyWhcNMTcwMjA1MTYzNTEyWjAZMRcw
       FQYDVQQDDA5rdWJlLWFwaXNlcnZlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
       AQoCggEBAM3CqmUgdXWpxWvoVFltTMgBCZuRkCtDDlB2qfRsGRPv3QTaDeYB++My
       hB+93qqvcvS7JVpxGBedn3Ca6xZrkFpKuXjCQg/K4KU9P1YhbA1ye8cF9NM4RK+U
@@ -59,13 +59,13 @@ write_files:
       LUO8N4s7yAGtqPACeQiLG1Qp0ijB1l0CAwEAAaOBljCBkzAJBgNVHRMEAjAAMAsG
       A1UdDwQEAwIF4DB5BgNVHREEcjBwggprdWJlcm5ldGVzghJrdWJlcm5ldGVzLmRl
       ZmF1bHSCFmt1YmVybmV0ZXMuZGVmYXVsdC5zdmOCJGt1YmVybmV0ZXMuZGVmYXVs
-      dC5zdmMuY2x1c3Rlci5sb2NhbIcEwKgfMocECmQAAYcEfwAAATANBgkqhkiG9w0B
-      AQUFAAOCAQEAZgmqWgTFeTI97oFtzjTXKlsI0UFC3BrWYRxvfoLcrt43q1fxBciR
-      YLgKUZrH6k8KL1OkwQsebfFnuiagpvK2d5yy66p1OeuxVLzcnz5slcOGZcumf37b
-      vl/mtLFxuAzbWmlqhJW8AKNPWqUZjAJamajvSiz5lH7ptL7qa58NoPvE61qgaZwh
-      8ago3jVQbsav/JU3mW7sNyD5Bn3dGMphEEztU7v6M9iMIf88EIbFdsAVxurTZkDT
-      6waZ5kMA5jbnWhhXW1O1VaNKUdH+xZLF5+6tw/zveNTfNI3JUZhB68gZWU3jkQH/
-      dQ7TxG1hzOqvgGVWMLVDQs54UYOXainvqw==
+      dC5zdmMuY2x1c3Rlci5sb2NhbIcECgACCocECmQAAYcEfwAAATANBgkqhkiG9w0B
+      AQUFAAOCAQEAm30TcVJtTzkFjGKUqoItZF0vrOYhdHCg6GntsmvQRMBYqXKF2XQr
+      jCsziohRAsK/wdV8r6Zcd7K+SpF3lE+7kCdAmG9MruRFWFDAZXCtQjmrN7qltPIN
+      nR1IHcZujgKgnV69aVeuewpkVvvQnRDuFIMkRCd4YDPkRdFi9OFeQQVpbIrgKX1L
+      G6kW9EPCqYGzgyZLIvA7MvdalZbVzht7BQb3RAhv6ZENAPZdYdgF+pSsTeygqo+L
+      w3ymyjZeG4f6vyOcNoHGNc69yPWhmHcJotxE0PyM4JycIW4iScJsrpRHT5qj5Tpw
+      vC6BA2uIyaWY3jONgreXoPTQ4/fXXUJe0g==
       -----END CERTIFICATE-----
   - path: /etc/kubernetes/ssl/apiserver-key.pem
     permissions: 0600
@@ -101,7 +101,7 @@ write_files:
 
 coreos:
   etcd2:
-    name: master50
+    name: master${num}
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     initial-cluster: etcd1=http://${etcdip1}:2380,etcd2=http://${etcdip2}:2380,etcd3=http://${etcdip3}:2380
@@ -189,14 +189,14 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=-/usr/bin/mkdir -p /opt/bin
-        ExecStart=/usr/bin/wget -c -nc -P /opt/bin http://192.168.31.70/v1.1.7/hyperkube
+      ExecStart=/usr/bin/wget -c -nv -nc -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.1.7/bin/linux/amd64/hyperkube
         ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
     - name: kube-apiserver.service
       command: start
       content: |
         [Unit]
-        Requires=etcd2.service docker-cache.service fleet.service docker.service flanneld.service kube-install.service
-        After=etcd2.service docker-cache.service fleet.service docker.service flanneld.service kube-install.service
+        Requires=etcd2.service docker-cache.service docker.service flanneld.service kube-install.service
+        After=etcd2.service docker-cache.service docker.service flanneld.service kube-install.service
         [Service]
         ExecStart=/opt/bin/hyperkube apiserver \
           --bind-address=0.0.0.0 \
